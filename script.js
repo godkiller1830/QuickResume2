@@ -3,6 +3,7 @@ import { PreviewManager } from './js/preview.js';
 import { NavigationManager } from './js/navigation.js';
 import { StorageManager } from './js/storage.js';
 import { ExportManager } from './js/export.js';
+import { AIManager } from './js/ai/AIManager.js';
 import { auth } from './js/firebaseConfig.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navigationManager = new NavigationManager();
   const storageManager = new StorageManager(form, skillsManager);
   const exportManager = new ExportManager();
+  const aiManager = new AIManager(form);
 
   // Add more fields functionality
   document.querySelectorAll('.add-more-btn').forEach(btn => {
@@ -28,6 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
           const newEntry = entry.cloneNode(true);
           newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
           container.appendChild(newEntry);
+          
+          // Initialize AI buttons for new fields
+          aiManager.initializeAIButtons();
           previewManager.updatePreview();
         }
       }
@@ -45,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (user) {
       const loaded = await storageManager.loadDraft();
       if (loaded) {
-        // Update preview after loading data
         previewManager.updatePreview();
       }
     } else {

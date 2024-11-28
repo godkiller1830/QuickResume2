@@ -1,5 +1,6 @@
 import { auth, db } from './firebaseConfig.js';
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { showLoader, hideLoader } from "./loader.js";
 
 export class StorageManager {
   constructor(form, skillsManager) {
@@ -70,6 +71,7 @@ export class StorageManager {
     const formData = new FormData(this.form);
     const resumePreview = document.getElementById('resumePreview');
     const user = auth.currentUser;
+    showLoader(); // Show loader before saving
 
     if (!user) {
       console.error("User is not authenticated.");
@@ -77,6 +79,7 @@ export class StorageManager {
     }
 
     try {
+      const formData = new FormData(this.form);
       const data = {
         title: formData.get('fullName') || 'Untitled Resume',
         lastModified: new Date(),

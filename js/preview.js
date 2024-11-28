@@ -8,7 +8,6 @@ export class PreviewManager {
   initializeTemplateSelection() {
     const templateSelect = document.getElementById('templateSelect');
     if (templateSelect) {
-      // Get template from URL parameters
       const urlParams = new URLSearchParams(window.location.search);
       const templateParam = urlParams.get('template');
       
@@ -38,6 +37,7 @@ export class PreviewManager {
     if (!this.preview) return;
 
     const formData = new FormData(this.form);
+    const template = document.getElementById('templateSelect')?.value || 'default';
     
     const fullName = formData.get('fullName') || 'Your Name';
     const email = formData.get('email') || 'email@example.com';
@@ -53,22 +53,112 @@ export class PreviewManager {
       ${portfolio ? `<a href="${portfolio}" target="_blank" class="social-link"><i class="fas fa-globe"></i> Portfolio</a>` : ''}
     `;
 
-    this.preview.innerHTML = `
+    if (template === 'elegant') {
+      this.preview.innerHTML = this.generateElegantTemplate(formData, socialLinksHtml);
+    } else if (template === 'modern') {
+      this.preview.innerHTML = this.generateModernTemplate(formData, socialLinksHtml);
+    } else {
+      this.preview.innerHTML = this.generateDefaultTemplate(formData, socialLinksHtml);
+    }
+
+    this.updateSections(formData);
+  }
+
+  generateElegantTemplate(formData, socialLinksHtml) {
+    return `
+      <div class="sidebar">
+        <div class="profile-section">
+          <div class="profile-name">${formData.get('fullName') || 'Your Name'}</div>
+          <div class="profile-title">${formData.get('professionalTitle') || 'Professional Title'}</div>
+        </div>
+        <div class="contact-section">
+          <div class="sidebar-heading">Contact</div>
+          <div class="contact-list">
+            <div class="contact-item"><i class="fas fa-envelope"></i> ${formData.get('email')}</div>
+            <div class="contact-item"><i class="fas fa-phone"></i> ${formData.get('phone')}</div>
+            <div class="contact-item"><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</div>
+            ${socialLinksHtml}
+          </div>
+        </div>
+        <div class="skills-section">
+          <div class="sidebar-heading">Skills</div>
+          <div class="skills-list" id="skillsList"></div>
+        </div>
+      </div>
+      <div class="main-content">
+        <div class="section">
+          <div class="section__title"><i class="fas fa-user"></i> Professional Summary</div>
+          <p>${formData.get('summary')}</p>
+        </div>
+        <div class="section" id="experienceSection">
+          <div class="section__title"><i class="fas fa-briefcase"></i> Experience</div>
+          <div class="section__list" id="experienceList"></div>
+        </div>
+        <div class="section" id="educationSection">
+          <div class="section__title"><i class="fas fa-graduation-cap"></i> Education</div>
+          <div class="section__list" id="educationList"></div>
+        </div>
+        <div class="section" id="additionalSection">
+          <div class="section__title"><i class="fas fa-plus-circle"></i> Additional Information</div>
+          <div class="section__list" id="additionalList"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  generateModernTemplate(formData, socialLinksHtml) {
+    return `
       <div class="header">
-        <div class="full-name">${fullName}</div>
-        <div id="position">${professionalTitle}</div>
+        <div class="full-name">${formData.get('fullName')}</div>
+        <div id="position">${formData.get('professionalTitle')}</div>
         <div class="contact-info">
-          <span><i class="fas fa-envelope"></i> ${email}</span>
-          <span class="separator">|</span>
-          <span><i class="fas fa-phone"></i> ${phone}</span>
-          <span class="separator">|</span>
-          <span><i class="fas fa-map-marker-alt"></i> ${location}</span>
+          <span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>
+          <span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>
+          <span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>
         </div>
-        <div class="social-links">
-          ${socialLinksHtml}
-        </div>
+        <div class="social-links">${socialLinksHtml}</div>
         <div class="about">
-          <p id="aboutDesc">${summary}</p>
+          <p>${formData.get('summary')}</p>
+        </div>
+      </div>
+      <div class="details">
+        <div class="main-column">
+          <div class="section" id="experienceSection">
+            <div class="section__title">Professional Experience</div>
+            <div class="section__list" id="experienceList"></div>
+          </div>
+          <div class="section" id="educationSection">
+            <div class="section__title">Education</div>
+            <div class="section__list" id="educationList"></div>
+          </div>
+        </div>
+        <div class="side-column">
+          <div class="section" id="skillsSection">
+            <div class="section__title">Skills & Expertise</div>
+            <div class="skills-list" id="skillsList"></div>
+          </div>
+          <div class="section" id="additionalSection">
+            <div class="section__title">Additional Information</div>
+            <div class="section__list" id="additionalList"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  generateDefaultTemplate(formData, socialLinksHtml) {
+    return `
+      <div class="header">
+        <div class="full-name">${formData.get('fullName')}</div>
+        <div id="position">${formData.get('professionalTitle')}</div>
+        <div class="contact-info">
+          <span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>
+          <span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>
+          <span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>
+        </div>
+        <div class="social-links">${socialLinksHtml}</div>
+        <div class="about">
+          <p>${formData.get('summary')}</p>
         </div>
       </div>
       <div class="details">
@@ -90,7 +180,9 @@ export class PreviewManager {
         </div>
       </div>
     `;
+  }
 
+  updateSections(formData) {
     this.updateExperience(formData);
     this.updateEducation(formData);
     this.updateSkills();
@@ -111,7 +203,11 @@ export class PreviewManager {
     experienceList.innerHTML = jobTitles.map((title, i) => `
       <div class="section__list-item">
         <h3>${title}</h3>
-        <p class="light">${companies[i]} ${locations[i] ? `| ${locations[i]}` : ''} | ${this.formatDate(startDates[i])} - ${this.formatDate(endDates[i])}</p>
+        <p class="light">
+          <i class="fas fa-building"></i> ${companies[i]}
+          ${locations[i] ? `<i class="fas fa-map-marker-alt"></i> ${locations[i]}` : ''}
+          <i class="fas fa-calendar"></i> ${this.formatDate(startDates[i])} - ${this.formatDate(endDates[i])}
+        </p>
         <p>${descriptions[i]}</p>
       </div>
     `).join('');
@@ -130,7 +226,11 @@ export class PreviewManager {
     educationList.innerHTML = degrees.map((degree, i) => `
       <div class="section__list-item">
         <h3>${degree}</h3>
-        <p class="light">${schools[i]} ${locations[i] ? `| ${locations[i]}` : ''} | ${this.formatDate(eduStartDates[i])} - ${this.formatDate(eduEndDates[i])}</p>
+        <p class="light">
+          <i class="fas fa-university"></i> ${schools[i]}
+          ${locations[i] ? `<i class="fas fa-map-marker-alt"></i> ${locations[i]}` : ''}
+          <i class="fas fa-calendar"></i> ${this.formatDate(eduStartDates[i])} - ${this.formatDate(eduEndDates[i])}
+        </p>
       </div>
     `).join('');
   }
@@ -143,7 +243,10 @@ export class PreviewManager {
     const skills = skillsHidden?.value.split(',').filter(Boolean) || [];
 
     skillsList.innerHTML = skills.map(skill => `
-      <span class="skill-tag">${skill}</span>
+      <span class="skill-tag">
+        <i class="fas fa-check-circle"></i>
+        ${skill}
+      </span>
     `).join('');
   }
 
@@ -167,8 +270,8 @@ export class PreviewManager {
       <div class="additional-group">
         <h3 class="additional-type-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h3>
         ${items.map(item => `
-          <div class="additional-item">
-            <h4>${item.title}</h4>
+          <div class="section__list-item">
+            <h3>${item.title}</h3>
             <p>${item.description}</p>
           </div>
         `).join('')}

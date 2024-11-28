@@ -1,3 +1,5 @@
+import { TipsManager } from './tips/TipsManager.js';
+
 export class NavigationManager {
   constructor() {
     this.sections = document.querySelectorAll('.form-section');
@@ -5,8 +7,10 @@ export class NavigationManager {
     this.prevBtn = document.querySelector('.prev-btn');
     this.nextBtn = document.querySelector('.next-btn');
     this.currentSection = 1;
+    this.tipsManager = new TipsManager();
 
     this.initializeEventListeners();
+    this.addTipsButtons();
   }
 
   initializeEventListeners() {
@@ -16,6 +20,41 @@ export class NavigationManager {
     if (this.nextBtn) {
       this.nextBtn.addEventListener('click', () => this.navigate('next'));
     }
+  }
+
+  addTipsButtons() {
+    this.sections.forEach(section => {
+      const sectionType = this.getSectionType(section);
+      if (sectionType) {
+        const container = section.querySelector('.form-group');
+        if (container) {
+          const tipsBtn = document.createElement('button');
+          tipsBtn.type = 'button';
+          tipsBtn.className = 'show-tips-btn';
+          tipsBtn.innerHTML = '<i class="fas fa-lightbulb"></i>';
+          tipsBtn.title = 'Show section tips';
+          
+          tipsBtn.addEventListener('click', () => {
+            this.tipsManager.showTips(sectionType);
+          });
+          
+          container.style.position = 'relative';
+          container.appendChild(tipsBtn);
+        }
+      }
+    });
+  }
+
+  getSectionType(section) {
+    const sectionNumber = section.dataset.section;
+    const types = {
+      '1': 'summary',
+      '2': 'experience',
+      '3': 'education',
+      '4': 'skills',
+      '6': 'additional'
+    };
+    return types[sectionNumber];
   }
 
   navigate(direction) {
