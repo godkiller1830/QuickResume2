@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - QuickResume</title>
+    <link rel="stylesheet" href="css/home.css">
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">QuickResume</div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <button id="themeToggle" class="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Create Account</h1>
+                <p>Start building your professional resume</p>
+            </div>
+
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-container">
+                        <input type="password" id="password" required placeholder="Create a password">
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="error-message"></div>
+
+                <button type="submit" class="auth-button">Sign Up</button>
+
+                <div class="social-auth">
+                    <div class="social-auth-divider">
+                        <span>Or continue with</span>
+                    </div>
+                    <button type="button" id="googleSignUp" class="google-auth-button">
+                        <i class="fab fa-google"></i>
+                        Sign up with Google
+                    </button>
+                </div>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="/login.html">Sign in</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { signUpWithEmail } from './js/auth/emailAuth.js';
+        import { signInWithGoogle } from './js/auth/googleAuth.js';
+        import { getAuthErrorMessage } from './js/auth/errorHandler.js';
+        import { auth } from './js/firebaseConfig.js';
+        import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const themeIcon = themeToggle.querySelector('i');
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            html.classList.toggle('dark', savedTheme === 'dark');
+            updateThemeIcon();
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeIcon();
+        });
+
+        function updateThemeIcon() {
+            const isDark = html.classList.contains('dark');
+            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Password visibility toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordField = document.getElementById('password');
+
+        togglePassword.addEventListener('click', () => {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            togglePassword.querySelector('i').classList.toggle('fa-eye');
+            togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+
+        // Form submission
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const googleSignUpButton = document.getElementById('googleSignUp');
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = passwordField.value;
+
+            try {
+                await signUpWithEmail(email, password);
+            } catch (error) {
+                errorMessage.textContent = getAuthErrorMessage(error.code);
+                errorMessage.classList.add('visible');
+            }
+        });
+
+        googleSignUpButton.addEventListener('click', async () => {
+            try {
+                await signInWithGoogle();
+            } catch (error) {
+                errorMessage.textContent = getAuthErrorMessage(error.code);
+                errorMessage.classList.add('visible');
+            }
+        });
+
+        // Redirect if already signed in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>
