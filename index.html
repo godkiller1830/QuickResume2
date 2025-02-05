@@ -27,8 +27,8 @@
     </nav>
     <div class="loader-overlay" id="globalLoader">
       <div class="loader"></div>
-  </div>
-  
+    </div>
+
     <main>
       <section class="hero">
         <div class="hero-content">
@@ -37,23 +37,17 @@
           </h1>
           <p>Stand out from the crowd with a beautifully designed resume</p>
           <div class="cta-buttons">
-            <a href="/login.html" class="cta-primary"
-              >Get Started <i class="fas fa-arrow-right"></i
-            ></a>
-            <button class="cta-secondary">View Templates</button>
+            <a href="/login.html" class="cta-primary">
+              Get Started <i class="fas fa-arrow-right"></i>
+            </a>
+            <button class="cta-secondary" id="viewTemplatesBtn">View Templates</button>
           </div>
         </div>
-        <div class="hero-image">
-          <div class="floating-elements">
-            <div class="template-preview"></div>
-            <div class="floating-icon icon-1">
-              <i class="fas fa-briefcase"></i>
-            </div>
-            <div class="floating-icon icon-2">
-              <i class="fas fa-graduation-cap"></i>
-            </div>
-            <div class="floating-icon icon-3"><i class="fas fa-star"></i></div>
-          </div>
+        <div class="hero-video">
+          <video autoplay loop muted playsinline>
+            <source src="video/hero.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
         </div>
       </section>
 
@@ -85,50 +79,72 @@
             <h3>Auto-Save</h3>
             <p>Never lose your progress with automatic cloud saving</p>
           </div>
+          <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
+            <i class="fas fa-robot"></i>
+            <h3>AI Assistant</h3>
+            <p>Get intelligent suggestions to improve your resume content and optimize for ATS</p>
+          </div>
         </div>
       </section>
 
       <section id="introduction" class="introduction">
         <h2>How It Works</h2>
-        <div class="steps">
-          <div class="step-container">
-            <div class="step">
-              <div class="step-number">1</div>
-              <h3>Choose a Template</h3>
-              <p>Select from our professional designs</p>
+        <div class="interactive-steps">
+          <div class="step-card" data-step="1">
+            <div class="step-icon">
+              <i class="fas fa-palette"></i>
             </div>
-            <div class="step">
-              <div class="step-number">2</div>
-              <h3>Fill in Details</h3>
-              <p>Use our guided builder with smart suggestions</p>
-            </div>
-            <div class="step">
-              <div class="step-number">3</div>
-              <h3>Download</h3>
-              <p>Get your polished PDF resume</p>
+            <div class="step-content">
+              <h3>Choose Template</h3>
+              <p>Select from our professionally designed templates</p>
+              <div class="step-preview">
+                <div class="template-preview-animation"></div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="intro-features">
-          <div class="feature-card">
-            <i class="fas fa-paint-brush"></i>
-            <h3>Choose Template</h3>
-            <p>Select from our professionally designed templates</p>
+
+          <div class="step-card" data-step="2">
+            <div class="step-icon">
+              <i class="fas fa-edit"></i>
+            </div>
+            <div class="step-content">
+              <h3>Fill Details</h3>
+              <p>Use our smart builder with AI-powered suggestions</p>
+              <div class="step-preview">
+                <div class="form-animation"></div>
+              </div>
+            </div>
           </div>
-          <div class="feature-card">
-            <i class="fas fa-edit"></i>
-            <h3>Easy Editing</h3>
-            <p>Build using pre-written examples and suggestions</p>
+
+          <div class="step-card" data-step="3">
+            <div class="step-icon">
+              <i class="fas fa-magic"></i>
+            </div>
+            <div class="step-content">
+              <h3>AI Enhancement</h3>
+              <p>Get intelligent suggestions to improve your content</p>
+              <div class="step-preview">
+                <div class="ai-animation"></div>
+              </div>
+            </div>
           </div>
-          <div class="feature-card">
-            <i class="fas fa-download"></i>
-            <h3>Download PDF</h3>
-            <p>Export your resume in professional PDF format</p>
+
+          <div class="step-card" data-step="4">
+            <div class="step-icon">
+              <i class="fas fa-file-export"></i>
+            </div>
+            <div class="step-content">
+              <h3>Export & Share</h3>
+              <p>Download your polished resume in PDF format</p>
+              <div class="step-preview">
+                <div class="export-animation"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="templates">
+      <section id="templates" class="templates">
         <h2>Professional Templates</h2>
         <div class="template-slider">
           <div class="template-card">
@@ -146,6 +162,18 @@
             <h3>Classic</h3>
             <a href="/login.html" class="use-template">Use Template</a>
           </div>
+          <div class="template-card coming-soon">
+            <div class="template-preview">
+              <div class="coming-soon-overlay">
+                <i class="fas fa-clock"></i>
+                <span>Coming Soon</span>
+              </div>
+            </div>
+            <h3>Creative</h3>
+            <div class="coming-soon-badge">
+              <i class="fas fa-clock"></i> Coming Soon
+            </div>
+          </div>
         </div>
       </section>
 
@@ -156,9 +184,9 @@
             Join thousands of job seekers who've successfully landed their dream
             jobs
           </p>
-          <a href="/login.html" class="cta-primary"
-            >Create Your Resume Now <i class="fas fa-arrow-right"></i
-          ></a>
+          <a href="/login.html" class="cta-primary">
+            Create Your Resume Now <i class="fas fa-arrow-right"></i>
+          </a>
         </div>
       </section>
     </main>
@@ -172,7 +200,7 @@
         <div class="footer-section">
           <h4>Quick Links</h4>
           <a href="/login.html">Resume Builder</a>
-          <a href="#">Templates</a>
+          <a href="#templates">Templates</a>
           <a href="#">Pricing</a>
         </div>
         <div class="footer-section">

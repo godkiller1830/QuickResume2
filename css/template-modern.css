@@ -6,6 +6,9 @@
   background: white;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
   position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -14,6 +17,10 @@
   color: white;
   position: relative;
   overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .header::after {
@@ -38,7 +45,7 @@
 #position {
   font-size: 1.4rem;
   color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-weight: 500;
 }
 
@@ -46,8 +53,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   font-size: 0.95rem;
+  min-height: 1.5rem;
 }
 
 .contact-info span {
@@ -64,7 +72,8 @@
 .social-links {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  min-height: 2.5rem;
 }
 
 .social-link {
@@ -88,9 +97,10 @@
   background: rgba(255, 255, 255, 0.1);
   padding: 1.5rem;
   border-radius: 0.5rem;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   font-size: 0.95rem;
   line-height: 1.6;
+  min-height: 1rem;
 }
 
 .details {
@@ -98,10 +108,28 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 3rem;
+  flex: 1;
+  background: white;
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.side-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
 .section {
   margin-bottom: 2.5rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
 }
 
 .section__title {
@@ -124,9 +152,18 @@
   display: inline-block;
 }
 
+.section__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
 .section__list-item {
   margin-bottom: 2rem;
-  position: relative;
+}
+
+.section__list-item:last-child {
+  margin-bottom: 0;
 }
 
 .section__list-item h3 {
@@ -159,6 +196,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
+  min-height: 2rem;
 }
 
 .skill-tag {

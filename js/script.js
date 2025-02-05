@@ -15,24 +15,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const storageManager = new StorageManager(form, skillsManager);
   const exportManager = new ExportManager();
 
-  // Event listener for dynamically adding more fields (e.g., more experience entries)
-  document.querySelectorAll('.add-more-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const fieldType = btn.dataset.field;
-      const container = document.getElementById(`${fieldType}Fields`);
-      if (container) {
-        const entry = container.querySelector(`.${fieldType}-entry`);
-        if (entry) {
-          const newEntry = entry.cloneNode(true);
-          newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
-          container.appendChild(newEntry);
+  // // Event listener for dynamically adding more fields (e.g., more experience entries)
+  // document.querySelectorAll('.add-more-btn').forEach(btn => {
+  //   btn.addEventListener('click', () => {
+  //     const fieldType = btn.dataset.field;
+  //     const container = document.getElementById(`${fieldType}Fields`);
+  //     if (container) {
+  //       const entry = container.querySelector(`.${fieldType}-entry`);
+  //       if (entry) {
+  //         const newEntry = entry.cloneNode(true);
+  //         newEntry.querySelectorAll('input, textarea').forEach(input => input.value = '');
+  //         container.appendChild(newEntry);
           
-          // Ensure the preview updates when a new entry is added
-          previewManager.updatePreview();
-        }
-      }
-    });
-  });
+  //         // Ensure the preview updates when a new entry is added
+  //         previewManager.updatePreview();
+  //       }
+  //     }
+  //   });
+  // });
+
+  document.getElementById('scan-resume-btn').addEventListener('click', async () => {
+    const resumeContent = document.getElementById('resume-content').innerText;
+    const analysisResults = await new ResumeAnalyzer().analyzeResume(resumeContent);
+
+    const previewElement = document.getElementById('resume-preview');
+    const suggestionPanel = document.getElementById('suggestion-panel');
+
+    new AnalysisRenderer().render(previewElement, analysisResults);
+    new SuggestionPanel(suggestionPanel).displaySuggestions(analysisResults);
+});
 
   // Real-time preview update on any form input change
   form.addEventListener('input', () => previewManager.updatePreview());

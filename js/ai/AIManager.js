@@ -1,21 +1,19 @@
-import { ResumeAnalyzer } from './services/ResumeAnalyzer.js';
+import { AISuggestionService } from './services/AISuggestionService.js';
 import { SuggestionPanel } from './components/SuggestionPanel.js';
-import { PreviewManager } from '../preview.js';
 
 export class AIManager {
   constructor(form) {
     this.form = form;
-    this.analyzer = new ResumeAnalyzer();
-    this.previewManager = new PreviewManager(form);
-    this.suggestionPanel = new SuggestionPanel(document.body, {
-      onApply: (content) => this.applySuggestion(content),
-      onRegenerate: () => this.regenerateSuggestion(),
-      onClose: () => this.resetCurrentField()
-    });
-
+    this.suggestionService = new AISuggestionService();
+    this.suggestionPanel = new SuggestionPanel(
+      (content, type, elementId) => this.applySuggestion(content, type, elementId),
+      (type, elementId) => this.regenerateSuggestion(type, elementId)
+    );
+    
     this.currentField = null;
     this.currentType = null;
-    
+    this.currentElementId = null;
+
     this.initializeAIButtons();
   }
 
@@ -29,22 +27,25 @@ export class AIManager {
     aiFields.forEach(({ selector, type }) => {
       const fields = this.form.querySelectorAll(selector);
       fields.forEach(field => {
-        if (!field.parentElement.querySelector('.ai-suggest-btn')) {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'ai-suggest-btn';
-          button.innerHTML = '<i class="fas fa-magic"></i>';
-          button.title = 'Get AI suggestions';
-          button.dataset.type = type;
-          
-          button.addEventListener('click', () => this.generateSuggestion(field, type));
-          
-          const container = field.closest('.input-group');
-          if (container) {
-            container.style.position = 'relative';
-            container.appendChild(button);
-          }
+        const container = field.closest('.input-group');
+        if (!container) return;
+
+        // Remove existing AI button if any
+        const existingButton = container.querySelector('.ai-suggest-btn');
+        if (existingButton) {
+          existingButton.remove();
         }
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'ai-suggest-btn';
+        button.innerHTML = '<i class="fas fa-magic"></i>';
+        button.title = 'Get AI suggestions';
+        
+        button.addEventListener('click', () => this.generateSuggestion(field, type));
+        
+        container.style.position = 'relative';
+        container.appendChild(button);
       });
     });
   }
@@ -52,37 +53,40 @@ export class AIManager {
   async generateSuggestion(field, type) {
     this.currentField = field;
     this.currentType = type;
+    this.currentElementId = field.id;
     
     try {
-      const context = {
-        jobTitle: this.form.querySelector('[name="professionalTitle"]')?.value
-      };
-
-      const suggestion = await this.analyzer.analyzeSection(type, field.value, context);
-      this.suggestionPanel.show(suggestion, type);
+      const content = field.value;
+      const jobTitle = this.form.querySelector('[name="professionalTitle"]')?.value;
+      
+      const suggestion = await this.suggestionService.generateSuggestion(type, content, { jobTitle });
+      this.suggestionPanel.show(suggestion, type, field.id);
     } catch (error) {
       console.error('AI Suggestion Error:', error);
       this.suggestionPanel.showError('Failed to generate suggestion. Please try again.');
     }
   }
 
-  applySuggestion(content) {
-    if (!this.currentField) return;
+  applySuggestion(content, type, elementId) {
+    if (!elementId) return;
 
-    this.currentField.value = content;
-    this.currentField.dispatchEvent(new Event('input', { bubbles: true }));
-    this.previewManager.updatePreview();
-    this.suggestionPanel.hide();
-  }
-
-  async regenerateSuggestion() {
-    if (this.currentField && this.currentType) {
-      await this.generateSuggestion(this.currentField, this.currentType);
+    if (type === 'skills') {
+      const skillsManager = window.skillsManager;
+      const skills = content.split(',').map(skill => skill.trim());
+      skills.forEach(skill => skillsManager.addSkill(skill));
+    } else {
+      const editor = tinymce.get(elementId);
+      if (editor) {
+        editor.setContent(content);
+        editor.save();
+      }
     }
   }
 
-  resetCurrentField() {
-    this.currentField = null;
-    this.currentType = null;
+  async regenerateSuggestion(type, elementId) {
+    const field = document.getElementById(elementId);
+    if (field) {
+      await this.generateSuggestion(field, type);
+    }
   }
 }

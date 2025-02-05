@@ -1,9 +1,13 @@
 .suggestion-panel {
   position: fixed;
-  right: -400px;
+  right: -50%;
   top: 50%;
   transform: translateY(-50%);
-  width: 380px;
+  width: 40%; /* Change width dynamically */
+  max-width: 600px; /* Set a maximum width */
+  min-width: 300px; /* Set a minimum width */
+  max-height: 70vh; /* Limit panel height */
+  overflow-y: auto; /* Allow scrolling for long content */
   background: white;
   border-radius: 1rem 0 0 1rem;
   box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
@@ -19,6 +23,20 @@
 .suggestion-panel.active {
   right: 0;
 }
+
+@media (max-width: 768px) {
+  .suggestion-panel {
+    width: 80%;
+    right: -80%;
+    border-radius: 0;
+  }
+  
+  .suggestion-panel.active {
+    right: 0;
+  }
+}
+
+
 
 .suggestion-header {
   padding: 1rem;

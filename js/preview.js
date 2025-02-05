@@ -1,3 +1,5 @@
+import { isEmptySection } from './utils/previewUtils.js';
+
 export class PreviewManager {
   constructor(form) {
     this.form = form;
@@ -38,33 +40,76 @@ export class PreviewManager {
 
     const formData = new FormData(this.form);
     const template = document.getElementById('templateSelect')?.value || 'default';
-    
-    const fullName = formData.get('fullName') || 'Your Name';
-    const email = formData.get('email') || 'email@example.com';
-    const phone = formData.get('phone') || 'Phone Number';
-    const location = formData.get('location') || 'Location';
-    const professionalTitle = formData.get('professionalTitle') || 'Professional Title';
-    const summary = formData.get('summary') || 'Professional summary will appear here...';
-    const linkedin = formData.get('linkedin');
-    const portfolio = formData.get('portfolio');
 
-    const socialLinksHtml = `
-      ${linkedin ? `<a href="${linkedin}" target="_blank" class="social-link"><i class="fab fa-linkedin"></i> LinkedIn</a>` : ''}
-      ${portfolio ? `<a href="${portfolio}" target="_blank" class="social-link"><i class="fas fa-globe"></i> Portfolio</a>` : ''}
-    `;
+    // Get section data
+    const experienceData = this.getExperienceData(formData);
+    const educationData = this.getEducationData(formData);
+    const skillsData = document.getElementById('skillsHidden')?.value || '';
+    const additionalData = this.getAdditionalData(formData);
 
+    // Generate template HTML based on non-empty sections
+    let templateHTML = '';
     if (template === 'elegant') {
-      this.preview.innerHTML = this.generateElegantTemplate(formData, socialLinksHtml);
+      templateHTML = this.generateElegantTemplate(formData, experienceData, educationData, skillsData, additionalData);
     } else if (template === 'modern') {
-      this.preview.innerHTML = this.generateModernTemplate(formData, socialLinksHtml);
+      templateHTML = this.generateModernTemplate(formData, experienceData, educationData, skillsData, additionalData);
     } else {
-      this.preview.innerHTML = this.generateDefaultTemplate(formData, socialLinksHtml);
+      templateHTML = this.generateDefaultTemplate(formData, experienceData, educationData, skillsData, additionalData);
     }
 
-    this.updateSections(formData);
+    this.preview.innerHTML = templateHTML;
   }
 
-  generateElegantTemplate(formData, socialLinksHtml) {
+  getExperienceData(formData) {
+    const jobTitles = formData.getAll('jobTitle[]');
+    const companies = formData.getAll('company[]');
+    const locations = formData.getAll('location[]');
+    const startDates = formData.getAll('startDate[]');
+    const endDates = formData.getAll('endDate[]');
+    const descriptions = formData.getAll('jobDescription[]');
+
+    return jobTitles.map((title, i) => ({
+      title: title?.trim(),
+      company: companies[i]?.trim(),
+      location: locations[i]?.trim(),
+      startDate: startDates[i]?.trim(),
+      endDate: endDates[i]?.trim(),
+      description: descriptions[i]?.trim()
+    })).filter(exp => exp.title || exp.company || exp.description);
+  }
+
+  getEducationData(formData) {
+    const degrees = formData.getAll('degree[]');
+    const schools = formData.getAll('school[]');
+    const locations = formData.getAll('eduLocation[]');
+    const startDates = formData.getAll('eduStartDate[]');
+    const endDates = formData.getAll('eduEndDate[]');
+
+    return degrees.map((degree, i) => ({
+      degree: degree?.trim(),
+      school: schools[i]?.trim(),
+      location: locations[i]?.trim(),
+      startDate: startDates[i]?.trim(),
+      endDate: endDates[i]?.trim()
+    })).filter(edu => edu.degree || edu.school);
+  }
+
+  getAdditionalData(formData) {
+    const types = formData.getAll('additionalType[]');
+    const titles = formData.getAll('additionalTitle[]');
+    const descriptions = formData.getAll('additionalDescription[]');
+
+    return types.map((type, i) => ({
+      type: type?.trim(),
+      title: titles[i]?.trim(),
+      description: descriptions[i]?.trim()
+    })).filter(item => item.title || item.description);
+  }
+
+  generateElegantTemplate(formData, experienceData, educationData, skillsData, additionalData) {
+    const socialLinksHtml = this.generateSocialLinks(formData);
+    const skills = skillsData.split(',').filter(Boolean);
+
     return `
       <div class="sidebar">
         <div class="profile-section">
@@ -74,205 +119,230 @@ export class PreviewManager {
         <div class="contact-section">
           <div class="sidebar-heading">Contact</div>
           <div class="contact-list">
-            <div class="contact-item"><i class="fas fa-envelope"></i> ${formData.get('email')}</div>
-            <div class="contact-item"><i class="fas fa-phone"></i> ${formData.get('phone')}</div>
-            <div class="contact-item"><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</div>
+            ${formData.get('email') ? `<div class="contact-item"><i class="fas fa-envelope"></i> ${formData.get('email')}</div>` : ''}
+            ${formData.get('phone') ? `<div class="contact-item"><i class="fas fa-phone"></i> ${formData.get('phone')}</div>` : ''}
+            ${formData.get('location') ? `<div class="contact-item"><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</div>` : ''}
             ${socialLinksHtml}
           </div>
         </div>
-        <div class="skills-section">
-          <div class="sidebar-heading">Skills</div>
-          <div class="skills-list" id="skillsList"></div>
-        </div>
+        ${skills.length > 0 ? `
+          <div class="skills-section">
+            <div class="sidebar-heading">Skills</div>
+            <div class="skills-list">
+              ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
       <div class="main-content">
-        <div class="section">
-          <div class="section__title"><i class="fas fa-user"></i> Professional Summary</div>
-          <p>${formData.get('summary')}</p>
-        </div>
-        <div class="section" id="experienceSection">
-          <div class="section__title"><i class="fas fa-briefcase"></i> Experience</div>
-          <div class="section__list" id="experienceList"></div>
-        </div>
-        <div class="section" id="educationSection">
-          <div class="section__title"><i class="fas fa-graduation-cap"></i> Education</div>
-          <div class="section__list" id="educationList"></div>
-        </div>
-        <div class="section" id="additionalSection">
-          <div class="section__title"><i class="fas fa-plus-circle"></i> Additional Information</div>
-          <div class="section__list" id="additionalList"></div>
-        </div>
+        ${formData.get('summary') ? `
+          <div class="section">
+            <div class="section__title"><i class="fas fa-user"></i> Professional Summary</div>
+            <p>${formData.get('summary')}</p>
+          </div>
+        ` : ''}
+        ${experienceData.length > 0 ? `
+          <div class="section">
+            <div class="section__title"><i class="fas fa-briefcase"></i> Experience</div>
+            <div class="section__list">
+              ${this.generateExperienceHTML(experienceData)}
+            </div>
+          </div>
+        ` : ''}
+        ${educationData.length > 0 ? `
+          <div class="section">
+            <div class="section__title"><i class="fas fa-graduation-cap"></i> Education</div>
+            <div class="section__list">
+              ${this.generateEducationHTML(educationData)}
+            </div>
+          </div>
+        ` : ''}
+        ${additionalData.length > 0 ? `
+          <div class="section">
+            <div class="section__title"><i class="fas fa-plus-circle"></i> Additional Information</div>
+            <div class="section__list">
+              ${this.generateAdditionalHTML(additionalData)}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
 
-  generateModernTemplate(formData, socialLinksHtml) {
+  generateModernTemplate(formData, experienceData, educationData, skillsData, additionalData) {
+    const socialLinksHtml = this.generateSocialLinks(formData);
+    const skills = skillsData.split(',').filter(Boolean);
+
     return `
       <div class="header">
-        <div class="full-name">${formData.get('fullName')}</div>
-        <div id="position">${formData.get('professionalTitle')}</div>
+        <div class="full-name">${formData.get('fullName') || 'Your Name'}</div>
+        <div id="position">${formData.get('professionalTitle') || 'Professional Title'}</div>
         <div class="contact-info">
-          <span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>
-          <span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>
-          <span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>
+          ${formData.get('email') ? `<span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>` : ''}
+          ${formData.get('phone') ? `<span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>` : ''}
+          ${formData.get('location') ? `<span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>` : ''}
         </div>
-        <div class="social-links">${socialLinksHtml}</div>
-        <div class="about">
-          <p>${formData.get('summary')}</p>
-        </div>
+        ${socialLinksHtml ? `<div class="social-links">${socialLinksHtml}</div>` : ''}
+        ${formData.get('summary') ? `
+          <div class="about">
+            <p>${formData.get('summary')}</p>
+          </div>
+        ` : ''}
       </div>
       <div class="details">
         <div class="main-column">
-          <div class="section" id="experienceSection">
-            <div class="section__title">Professional Experience</div>
-            <div class="section__list" id="experienceList"></div>
-          </div>
-          <div class="section" id="educationSection">
-            <div class="section__title">Education</div>
-            <div class="section__list" id="educationList"></div>
-          </div>
+          ${experienceData.length > 0 ? `
+            <div class="section">
+              <div class="section__title">Professional Experience</div>
+              <div class="section__list">
+                ${this.generateExperienceHTML(experienceData)}
+              </div>
+            </div>
+          ` : ''}
+          ${educationData.length > 0 ? `
+            <div class="section">
+              <div class="section__title">Education</div>
+              <div class="section__list">
+                ${this.generateEducationHTML(educationData)}
+              </div>
+            </div>
+          ` : ''}
         </div>
         <div class="side-column">
-          <div class="section" id="skillsSection">
-            <div class="section__title">Skills & Expertise</div>
-            <div class="skills-list" id="skillsList"></div>
-          </div>
-          <div class="section" id="additionalSection">
-            <div class="section__title">Additional Information</div>
-            <div class="section__list" id="additionalList"></div>
-          </div>
+          ${skills.length > 0 ? `
+            <div class="section">
+              <div class="section__title">Skills & Expertise</div>
+              <div class="skills-list">
+                ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+          ${additionalData.length > 0 ? `
+            <div class="section">
+              <div class="section__title">Additional Information</div>
+              <div class="section__list">
+                ${this.generateAdditionalHTML(additionalData)}
+              </div>
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
   }
 
-  generateDefaultTemplate(formData, socialLinksHtml) {
+  generateDefaultTemplate(formData, experienceData, educationData, skillsData, additionalData) {
+    const socialLinksHtml = this.generateSocialLinks(formData);
+    const skills = skillsData.split(',').filter(Boolean);
+
     return `
       <div class="header">
-        <div class="full-name">${formData.get('fullName')}</div>
-        <div id="position">${formData.get('professionalTitle')}</div>
+        <div class="full-name">${formData.get('fullName') || 'Your Name'}</div>
+        <div id="position">${formData.get('professionalTitle') || 'Professional Title'}</div>
         <div class="contact-info">
-          <span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>
-          <span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>
-          <span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>
+          ${formData.get('email') ? `<span><i class="fas fa-envelope"></i> ${formData.get('email')}</span>` : ''}
+          ${formData.get('phone') ? `<span><i class="fas fa-phone"></i> ${formData.get('phone')}</span>` : ''}
+          ${formData.get('location') ? `<span><i class="fas fa-map-marker-alt"></i> ${formData.get('location')}</span>` : ''}
         </div>
-        <div class="social-links">${socialLinksHtml}</div>
-        <div class="about">
-          <p>${formData.get('summary')}</p>
-        </div>
+        ${socialLinksHtml ? `<div class="social-links">${socialLinksHtml}</div>` : ''}
+        ${formData.get('summary') ? `
+          <div class="about">
+            <p>${formData.get('summary')}</p>
+          </div>
+        ` : ''}
       </div>
       <div class="details">
-        <div class="section" id="experienceSection">
-          <div class="section__title">Experience</div>
-          <div class="section__list" id="experienceList"></div>
-        </div>
-        <div class="section" id="educationSection">
-          <div class="section__title">Education</div>
-          <div class="section__list" id="educationList"></div>
-        </div>
-        <div class="section" id="skillsSection">
-          <div class="section__title">Skills</div>
-          <div class="skills-list" id="skillsList"></div>
-        </div>
-        <div class="section" id="additionalSection">
-          <div class="section__title">Additional Information</div>
-          <div class="section__list" id="additionalList"></div>
-        </div>
+        ${experienceData.length > 0 ? `
+          <div class="section">
+            <div class="section__title">Experience</div>
+            <div class="section__list">
+              ${this.generateExperienceHTML(experienceData)}
+            </div>
+          </div>
+        ` : ''}
+        ${educationData.length > 0 ? `
+          <div class="section">
+            <div class="section__title">Education</div>
+            <div class="section__list">
+              ${this.generateEducationHTML(educationData)}
+            </div>
+          </div>
+        ` : ''}
+        ${skills.length > 0 ? `
+          <div class="section">
+            <div class="section__title">Skills</div>
+            <div class="skills-list">
+              ${skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+          </div>
+        ` : ''}
+        ${additionalData.length > 0 ? `
+          <div class="section">
+            <div class="section__title">Additional Information</div>
+            <div class="section__list">
+              ${this.generateAdditionalHTML(additionalData)}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
 
-  updateSections(formData) {
-    this.updateExperience(formData);
-    this.updateEducation(formData);
-    this.updateSkills();
-    this.updateAdditional(formData);
+  generateSocialLinks(formData) {
+    const linkedin = formData.get('linkedin');
+    const portfolio = formData.get('portfolio');
+    
+    const links = [];
+    if (linkedin) {
+      links.push(`<a href="https://${linkedin}" target="_blank" class="social-link"><i class="fab fa-linkedin"></i> LinkedIn</a>`);
+    }
+    if (portfolio) {
+      links.push(`<a href="https://${portfolio}" target="_blank" class="social-link"><i class="fas fa-globe"></i> Portfolio</a>`);
+    }
+    
+    return links.join('');
   }
 
-  updateExperience(formData) {
-    const experienceList = this.preview.querySelector('#experienceList');
-    if (!experienceList) return;
-
-    const jobTitles = formData.getAll('jobTitle[]');
-    const companies = formData.getAll('company[]');
-    const locations = formData.getAll('location[]');
-    const startDates = formData.getAll('startDate[]');
-    const endDates = formData.getAll('endDate[]');
-    const descriptions = formData.getAll('jobDescription[]');
-
-    experienceList.innerHTML = jobTitles.map((title, i) => `
+  generateExperienceHTML(experiences) {
+    return experiences.map(exp => `
       <div class="section__list-item">
-        <h3>${title}</h3>
+        <h3>${exp.title}</h3>
         <p class="light">
-          <i class="fas fa-building"></i> ${companies[i]}
-          ${locations[i] ? `<i class="fas fa-map-marker-alt"></i> ${locations[i]}` : ''}
-          <i class="fas fa-calendar"></i> ${this.formatDate(startDates[i])} - ${this.formatDate(endDates[i])}
+          ${exp.company ? `<i class="fas fa-building"></i> ${exp.company}` : ''}
+          ${exp.location ? `<i class="fas fa-map-marker-alt"></i> ${exp.location}` : ''}
+          ${exp.startDate ? `<i class="fas fa-calendar"></i> ${this.formatDate(exp.startDate)} - ${this.formatDate(exp.endDate)}` : ''}
         </p>
-        <p>${descriptions[i]}</p>
+        ${exp.description ? `<p>${exp.description}</p>` : ''}
       </div>
     `).join('');
   }
 
-  updateEducation(formData) {
-    const educationList = this.preview.querySelector('#educationList');
-    if (!educationList) return;
-
-    const degrees = formData.getAll('degree[]');
-    const schools = formData.getAll('school[]');
-    const locations = formData.getAll('eduLocation[]');
-    const eduStartDates = formData.getAll('eduStartDate[]');
-    const eduEndDates = formData.getAll('eduEndDate[]');
-
-    educationList.innerHTML = degrees.map((degree, i) => `
+  generateEducationHTML(education) {
+    return education.map(edu => `
       <div class="section__list-item">
-        <h3>${degree}</h3>
+        <h3>${edu.degree}</h3>
         <p class="light">
-          <i class="fas fa-university"></i> ${schools[i]}
-          ${locations[i] ? `<i class="fas fa-map-marker-alt"></i> ${locations[i]}` : ''}
-          <i class="fas fa-calendar"></i> ${this.formatDate(eduStartDates[i])} - ${this.formatDate(eduEndDates[i])}
+          ${edu.school ? `<i class="fas fa-university"></i> ${edu.school}` : ''}
+          ${edu.location ? `<i class="fas fa-map-marker-alt"></i> ${edu.location}` : ''}
+          ${edu.startDate ? `<i class="fas fa-calendar"></i> ${this.formatDate(edu.startDate)} - ${this.formatDate(edu.endDate)}` : ''}
         </p>
       </div>
     `).join('');
   }
 
-  updateSkills() {
-    const skillsList = this.preview.querySelector('#skillsList');
-    if (!skillsList) return;
-
-    const skillsHidden = document.getElementById('skillsHidden');
-    const skills = skillsHidden?.value.split(',').filter(Boolean) || [];
-
-    skillsList.innerHTML = skills.map(skill => `
-      <span class="skill-tag">
-        <i class="fas fa-check-circle"></i>
-        ${skill}
-      </span>
-    `).join('');
-  }
-
-  updateAdditional(formData) {
-    const additionalList = this.preview.querySelector('#additionalList');
-    if (!additionalList) return;
-
-    const types = formData.getAll('additionalType[]');
-    const titles = formData.getAll('additionalTitle[]');
-    const descriptions = formData.getAll('additionalDescription[]');
-
-    const groupedItems = types.reduce((acc, type, i) => {
-      if (titles[i] && descriptions[i]) {
-        if (!acc[type]) acc[type] = [];
-        acc[type].push({ title: titles[i], description: descriptions[i] });
-      }
+  generateAdditionalHTML(additionalItems) {
+    const groupedItems = additionalItems.reduce((acc, item) => {
+      if (!acc[item.type]) acc[item.type] = [];
+      acc[item.type].push(item);
       return acc;
     }, {});
 
-    additionalList.innerHTML = Object.entries(groupedItems).map(([type, items]) => `
+    return Object.entries(groupedItems).map(([type, items]) => `
       <div class="additional-group">
         <h3 class="additional-type-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h3>
         ${items.map(item => `
           <div class="section__list-item">
             <h3>${item.title}</h3>
-            <p>${item.description}</p>
+            ${item.description ? `<p>${item.description}</p>` : ''}
           </div>
         `).join('')}
       </div>

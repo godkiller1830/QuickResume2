@@ -1,6 +1,10 @@
+import { PDFExportService } from './services/PDFExportService.js';
+
 export class ExportManager {
   constructor() {
     this.exportBtn = document.querySelector('.export-btn');
+    this.pdfService = new PDFExportService();
+    
     if (this.exportBtn) {
       this.initializeEventListeners();
     }
@@ -10,24 +14,27 @@ export class ExportManager {
     this.exportBtn.addEventListener('click', () => this.exportPDF());
   }
 
-  exportPDF() {
+  async exportPDF() {
     const element = document.getElementById('resumePreview');
     if (!element) return;
 
-    const options = {
-      margin: 0.5,
-      filename: 'resume.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-    };
-
-    // Export PDF with selected template styling
-    html2pdf().set(options).from(element).save().then(() => {
-      alert('Resume exported successfully!');
-    }).catch(error => {
+    try {
+      this.exportBtn.disabled = true;
+      this.exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+      
+      await this.pdfService.exportToPDF(element);
+      
+      this.exportBtn.innerHTML = '<i class="fas fa-check"></i> Exported!';
+      setTimeout(() => {
+        this.exportBtn.disabled = false;
+        this.exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Export PDF';
+      }, 2000);
+    } catch (error) {
       console.error("Error exporting PDF:", error);
       alert("An error occurred while exporting the resume. Please try again.");
-    });
+      
+      this.exportBtn.disabled = false;
+      this.exportBtn.innerHTML = '<i class="fas fa-file-export"></i> Export PDF';
+    }
   }
 }

@@ -4,14 +4,14 @@ import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAyFY2A-1xI-_iprBhyxHWcyboNT-xeCz4",
-    authDomain: "quickresume-7c26a.firebaseapp.com",
-    projectId: "quickresume-7c26a",
-    storageBucket: "quickresume-7c26a.firebasestorage.app",
-    messagingSenderId: "441283705332",
-    appId: "1:441283705332:web:9a260bb469a69d4ef5e1a1",
-    measurementId: "G-JZH7RKYJF6"
-};
+    apiKey: "AIzaSyDdh82EMOfJDGth02uZ1jmzlZ7nqd79d1c",
+    authDomain: "quickresume-dbf57.firebaseapp.com",
+    projectId: "quickresume-dbf57",
+    storageBucket: "quickresume-dbf57.firebasestorage.app",
+    messagingSenderId: "288009008178",
+    appId: "1:288009008178:web:4f2bb42ea3b0c98cdef82b",
+    measurementId: "G-3K0H6R1TV0"
+  };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);

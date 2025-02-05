@@ -21,56 +21,31 @@ function updateThemeIcon() {
     themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// Testimonial Slider
-const testimonials = document.querySelectorAll('.testimonial-card');
-const dotsContainer = document.querySelector('.testimonial-dots');
-let currentTestimonial = 0;
-
-// Create dots
-testimonials.forEach((_, index) => {
-    const dot = document.createElement('div');
-    dot.classList.add('dot');
-    if (index === 0) dot.classList.add('active');
-    dot.addEventListener('click', () => showTestimonial(index));
-    dotsContainer.appendChild(dot);
-});
-
-
-
-
-// Intersection Observer for animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.classList.add('animate');
-            observer.unobserve(entry.target);
-        }
-    });
-}, observerOptions);
-
-// Observe all feature cards
-document.querySelectorAll('.feature-card').forEach(card => {
-    observer.observe(card);
-});
-
-// Smooth scroll for navigation links
+// Smooth scroll for navigation links including the View Templates button
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
+    anchor.addEventListener('click', handleSmoothScroll);
 });
+
+// Add click handler for View Templates button
+document.getElementById('viewTemplatesBtn').addEventListener('click', () => {
+    const templatesSection = document.getElementById('templates');
+    if (templatesSection) {
+        handleSmoothScroll(null, templatesSection);
+    }
+});
+
+function handleSmoothScroll(e, targetElement) {
+    if (e) e.preventDefault();
+    const target = targetElement || document.querySelector(this.getAttribute('href'));
+    if (target) {
+        const offset = 80; // Adjust this value based on your navbar height
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
+    }
+}
 
 // Navbar scroll effect
 const navbar = document.querySelector('.navbar');

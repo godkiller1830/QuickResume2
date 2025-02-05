@@ -8,12 +8,15 @@
     <link rel="stylesheet" href="css/builder.css" />
     <link rel="stylesheet" href="css/ai-assistant.css" />
     <link rel="stylesheet" href="css/tips.css" />
+    <link rel="stylesheet" href="css/editor.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script type="module" src="script.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css?family=Inter:400,500,600,700,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/analyzer.css" />
+    <link rel="stylesheet" href="css/pdf-export.css">
   </head>
- <body>
+  <body>
     <nav class="navbar">
       <div class="nav-content">
         <div class="logo">QuickResume</div>
@@ -34,8 +37,9 @@
     </nav>
 
     <main class="builder-container">
-      <div class="form-container">
-        <div class="template-selector">
+      <div class="form-container">        
+        <form id="resumeForm" class="resume-form">
+          <div class="template-selector">
           <label for="templateSelect">Choose Your Template Style</label>
           <select id="templateSelect" class="template-select">
             <option value="default">Professional Classic</option>
@@ -70,8 +74,7 @@
             <span>Additional</span>
           </div>
         </div>
-
-        <form id="resumeForm" class="resume-form">
+          <form id="resumeForm" class="resume-form">
           <div class="form-section active" data-section="1">
             <h2>Personal Information</h2>
             <div class="form-group">
@@ -105,7 +108,7 @@
               </div>
             </div>
           </div>
-
+          
           <div class="form-section" data-section="2">
             <h2>Work Experience</h2>
             <div id="experienceFields">
@@ -134,7 +137,7 @@
                 </div>
                 <div class="input-group">
                   <i class="fas fa-tasks input-icon"></i>
-                  <textarea name="jobDescription[]" placeholder="Job Description" rows="4" required></textarea>
+                  <textarea name="jobDescription[]" id="jobDescription-1" class="rich-text-editor" placeholder="Job Description" rows="4" required></textarea>
                 </div>
               </div>
             </div>
@@ -143,7 +146,7 @@
             </button>
           </div>
 
-          <div class="form-section" data-section="3">
+         <div class="form-section" data-section="3">
             <h2>Education</h2>
             <div id="educationFields">
               <div class="form-group education-entry">
@@ -198,7 +201,7 @@
             <div class="form-group">
               <div class="input-group">
                 <i class="fas fa-pen input-icon"></i>
-                <textarea name="summary" placeholder="Write a professional summary" rows="6" required></textarea>
+                <textarea name="summary" id="summary-editor" class="rich-text-editor" placeholder="Write a professional summary" rows="6" required></textarea>
               </div>
             </div>
           </div>
@@ -242,13 +245,17 @@
             <button type="button" class="save-btn">
               <i class="fas fa-save"></i> Save Draft
             </button>
+            <button id="scan-resume-btn" class="btn scan-resume">
+              <i class="fas fa-search"></i> Scan Resume
+            </button>
+            <div id="suggestion-panel" class="suggestion-panel"></div>            
             <button type="button" class="export-btn">
               <i class="fas fa-file-export"></i> Export PDF
             </button>
           </div>
         </form>
 
-        <div class="auto-save-toggle">
+       <div class="auto-save-toggle">
           <label>
             <input type="checkbox" id="autoSaveToggle" />
             Auto-Save
@@ -289,5 +296,10 @@
         themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
       }
     </script>
-  </body>
+
+<script type="module">
+  import { ResumeAnalyzer } from './js/analyzer/ResumeAnalyzer.js';
+  new ResumeAnalyzer();
+</script>
+</body>
 </html>

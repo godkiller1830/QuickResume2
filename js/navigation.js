@@ -48,7 +48,7 @@ export class NavigationManager {
   getSectionType(section) {
     const sectionNumber = section.dataset.section;
     const types = {
-      '1': 'summary',
+      '5': 'summary',
       '2': 'experience',
       '3': 'education',
       '4': 'skills',

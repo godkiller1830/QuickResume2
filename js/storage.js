@@ -114,39 +114,39 @@ export class StorageManager {
     if (!user || !this.currentResumeId) return false;
 
     try {
-      const resumeRef = doc(db, `users/${user.uid}/resumes/${this.currentResumeId}`);
-      const docSnap = await getDoc(resumeRef);
+        const resumeRef = doc(db, `users/${user.uid}/resumes/${this.currentResumeId}`);
+        const docSnap = await getDoc(resumeRef);
 
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        
-        // Set template
-        const templateSelect = document.getElementById('templateSelect');
-        if (templateSelect && data.template) {
-          templateSelect.value = data.template;
-          // Trigger template style update
-          const event = new Event('change');
-          templateSelect.dispatchEvent(event);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+
+            // Set form data
+            if (data.formData) {
+                Object.entries(data.formData).forEach(([key, value]) => {
+                    const input = this.form.querySelector(`[name="${key}"]`);
+                    if (input) input.value = value;
+
+                    // Update RTE content if input is part of TinyMCE
+                    if (input && input.classList.contains('rich-text-editor')) {
+                        const editor = tinymce.get(input.id);
+                        if (editor) {
+                            editor.setContent(value || '');
+                        }
+                    }
+                });
+            }
+
+            // Set skills
+            if (data.skills) {
+                this.skillsManager.setSkills(data.skills);
+            }
+
+            return true;
         }
-
-        // Set form data
-        if (data.formData) {
-          Object.entries(data.formData).forEach(([key, value]) => {
-            const input = this.form.querySelector(`[name="${key}"]`);
-            if (input) input.value = value;
-          });
-        }
-
-        // Set skills
-        if (data.skills) {
-          this.skillsManager.setSkills(data.skills);
-        }
-
-        return true;
-      }
     } catch (error) {
-      console.error("Error loading resume:", error);
+        console.error("Error loading resume:", error);
     }
     return false;
-  }
+}
+
 }
