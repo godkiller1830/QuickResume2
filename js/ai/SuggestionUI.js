@@ -8,11 +8,16 @@ export class SuggestionUI {
     const panel = document.createElement('div');
     panel.className = 'suggestion-panel';
     panel.innerHTML = `
-      
-   
+      <div class="suggestion-header">
+        <h3><i class="fas fa-magic"></i> AI Suggestions</h3>
+        <button class="close-suggestions" title="Close panel">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="suggestion-content"></div>
     `;
     this.container.appendChild(panel);
-    
+
     this.panel = panel;
     this.content = panel.querySelector('.suggestion-content');
     
